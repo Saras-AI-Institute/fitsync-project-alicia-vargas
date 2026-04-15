@@ -49,6 +49,55 @@ with col3:
     st.metric(label="Average Recovery Score", value=f"{avg_recovery}%", delta=None)
 
 # 8. Data Overview
-st.markdown(f"### Data Overview ({time_range})")
-st.dataframe(df, use_container_width=True, height=400)
+#st.markdown(f"### Data Overview ({time_range})")
+#st.dataframe(df, use_container_width=True, height=400)
 
+# 9. Visualizations (The part that was missing!)
+import plotly.express as px
+
+# Create the first row of charts
+chart_row1_col1, chart_row1_col2 = st.columns(2)
+
+with chart_row1_col1:
+    # Dual Line Chart: Recovery Score and Sleep Hours
+    fig_recovery_sleep = px.line(
+        df, 
+        x='Date', 
+        y=['Recovery_Score', 'Sleep_Hours'], 
+        title="Recovery Score & Sleep Trend"
+    )
+    st.plotly_chart(fig_recovery_sleep, use_container_width=True)
+
+with chart_row1_col2:
+    # Scatter Plot: recovery score vs steps
+    fig_steps_recovery = px.scatter(
+        df, 
+        x='Steps', 
+        y='Recovery_Score', 
+        color='Sleep_Hours', 
+        title="Recovery Score vs Daily Steps"
+    )
+    st.plotly_chart(fig_steps_recovery, use_container_width=True)
+
+# Create the second row of charts
+chart_row2_col1, chart_row2_col2 = st.columns(2)
+
+with chart_row2_col1:
+    # Scatter Plot: Recovery Score vs Heart Rate
+    fig_hr_recovery = px.scatter(
+        df, 
+        x='Heart_Rate_bpm', 
+        y='Recovery_Score', 
+        title="Recovery Score vs Resting Heart Rate"
+    )
+    st.plotly_chart(fig_hr_recovery, use_container_width=True)
+
+with chart_row2_col2:
+    # Line Chart: Calories Burned
+    fig_calories = px.line(
+        df, 
+        x='Date', 
+        y='Calories_Burned', 
+        title="Daily Calories Burned Trend"
+    )
+    st.plotly_chart(fig_calories, use_container_width=True)
