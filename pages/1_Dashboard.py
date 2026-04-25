@@ -1,9 +1,18 @@
 import streamlit as st
-from modules.processor import process_data
-import pandas as pd
 
 # 1. Page Configuration
 st.set_page_config(layout="wide", page_title="FitSync")
+
+from modules.processor import process_data
+import pandas as pd
+
+
+@st.cache_data
+# 4. Load the full dataset
+def load_data():
+    return process_data()
+
+df = load_data()
 
 # 2. Title
 st.title("FitSync - Personal Health Analytics")
@@ -12,13 +21,10 @@ st.markdown("---")
 # 3. Sidebar Filter
 st.sidebar.header("Filters")
 time_range = st.sidebar.selectbox(
-    "Select Time Range", 
-    options=["Last 7 Days", "Last 30 Days", "All time"], 
+    "Select Time Range",
+    options=["Last 7 Days", "Last 30 Days", "All time"],
     index=2
 )
-
-# 4. Load the full dataset
-df = process_data()
 
 # 5. Apply the logic for Filtering
 # We use the 'Date' column to determine what to keep
@@ -57,13 +63,12 @@ import plotly.express as px
 
 # Create the first row of charts
 chart_row1_col1, chart_row1_col2 = st.columns(2)
-
 with chart_row1_col1:
     # Dual Line Chart: Recovery Score and Sleep Hours
     fig_recovery_sleep = px.line(
         df, 
-        x='Date', 
-        y=['Recovery_Score', 'Sleep_Hours'], 
+        x='Date',
+        y=['Recovery_Score', 'Sleep_Hours'],
         title="Recovery Score & Sleep Trend"
     )
     st.plotly_chart(fig_recovery_sleep, use_container_width=True)
@@ -81,13 +86,12 @@ with chart_row1_col2:
 
 # Create the second row of charts
 chart_row2_col1, chart_row2_col2 = st.columns(2)
-
 with chart_row2_col1:
     # Scatter Plot: Recovery Score vs Heart Rate
     fig_hr_recovery = px.scatter(
         df, 
-        x='Heart_Rate_bpm', 
-        y='Recovery_Score', 
+        x='Heart_Rate_bpm',
+        y='Recovery_Score',
         title="Recovery Score vs Resting Heart Rate"
     )
     st.plotly_chart(fig_hr_recovery, use_container_width=True)
@@ -95,9 +99,10 @@ with chart_row2_col1:
 with chart_row2_col2:
     # Line Chart: Calories Burned
     fig_calories = px.line(
-        df, 
-        x='Date', 
-        y='Calories_Burned', 
+        df,
+        x='Date',
+        y='Calories_Burned',
         title="Daily Calories Burned Trend"
     )
     st.plotly_chart(fig_calories, use_container_width=True)
+

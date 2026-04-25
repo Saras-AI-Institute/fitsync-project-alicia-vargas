@@ -17,8 +17,12 @@ time_range = st.sidebar.selectbox(
     index=2
 )
 
+@st.cache_data
 # 4. Load the dataset
-df = process_data()
+def load_data():
+    return process_data()
+
+df = load_data()
 
 # 5. Apply the logic for Filtering
 # Determine what to keep based on the 'Date' column
