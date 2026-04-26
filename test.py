@@ -1,3 +1,7 @@
-from modules.processor import load_data
-df = load_data()
-print(df.head(20))
+from modules.processor import process_data
+
+# Now Python knows what "process_data" is!
+df = process_data()
+
+print("--- Data Successfully Merged ---")
+print(df.head())

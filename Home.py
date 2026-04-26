@@ -1,68 +1,70 @@
 import streamlit as st
+import pandas as pd
+from modules.interface import render_global_sidebar
+from modules.processor import process_data
 
-# 1. Page Configuration
+# 1. THE ONLY PAGE CONFIG (Must be at the very top)
 st.set_page_config(
-    layout="wide", 
-    page_title="FitSync | Your Health Journey",
-    page_icon="🏃"
+    layout="centered", 
+    page_title="FitSync | Peak Performance",
+    page_icon="🌈"
 )
-# This creates the sidebar content
-with st.sidebar:
-    st.header("📲 Data Integration")
-    st.write("Upload your exports to sync your health journey.")
-    
-    # This adds the 'Upload' button to the sidebar
-    health_file = st.file_uploader("Upload Health CSV", type="csv")
-    mood_file = st.file_uploader("Upload Mood CSV", type="csv")
 
-    st.divider()
-    st.caption("Connected to: Apple Health v2.4")
+# 2. Sidebar Activation (Global for all pages)
+render_global_sidebar()
+
+# 3. Rainbow Header Styling
+st.markdown("""
+    <div style="height: 8px; background: linear-gradient(to right, #ff4b4b, #ff9f4b, #f4ff4b, #4bff5a, #4b9fff, #7a4bff); border-radius: 10px; margin-bottom: 30px;"></div>
+    """, unsafe_allow_html=True)
+
+# 4. Hero Section
+st.title("FitSync.")
+st.markdown("""
+    ### *Where your body meets your mind.*
     
-# 2. Hero Section
-st.title("🏃 Welcome Back, Alicia")
-st.markdown("#### *Data-driven insights to fuel your next session*")
+    FitSync is a holistic health intelligence platform designed to bridge the gap 
+    between physical recovery and emotional well-being. By merging biometrics 
+    with daily reflections, we help you find your unique rhythm for peak performance.
+    """)
+
 st.write("---")
 
-# 3. User Journey Grid
-col1, col2 = st.columns(2)
+# 5. Feature Columns
+col1, col2, col3 = st.columns(3)
 
 with col1:
-    st.markdown("### 📊 My Dashboard")
-    st.write("Check your steps, sleep quality, and current recovery status.")
-    # This creates a link that looks like a button and points to your page
-    st.markdown("""
-        <a href="/Dashboard" target="_self">
-            <div style="display: inline-block; padding: 0.5em 1em; color: white; background-color: #ff4b4b; border-radius: 5px; text-decoration: none; width: 100%; text-align: center;">
-                Go to My Dashboard
-            </div>
-        </a>
-    """, unsafe_allow_html=True)
+    st.markdown("#### 🏃 Physical")
+    st.caption("Automated tracking of steps, sleep, and heart rate variability.")
 
 with col2:
-    st.markdown("### 📈 Health Trends")
-    st.write("See how your habits have changed over the last month.")
-    # This points to the Trends page
-    st.markdown("""
-        <a href="/Trends" target="_self">
-            <div style="display: inline-block; padding: 0.5em 1em; color: white; background-color: #ff4b4b; border-radius: 5px; text-decoration: none; width: 100%; text-align: center;">
-                Explore My Trends
-            </div>
-        </a>
-    """, unsafe_allow_html=True)
+    st.markdown("#### 🧠 Mental")
+    st.caption("Deep integration with your daily reflections and mood cycles.")
 
-# 4. Motivational / Status Section
-st.markdown("### Today's Focus")
-status_col1, status_col2, status_col3 = st.columns(3)
+with col3:
+    st.markdown("#### 📈 Intelligence")
+    st.caption("Proprietary Recovery Scores built on multi-source data fusion.")
 
-with status_col1:
-    st.success("✅ **Data Synced**\n\nYour latest activity is up to date.")
+st.write("<br><br>", unsafe_allow_html=True)
 
-with status_col2:
-    st.info("💡 **Daily Tip**\n\nUsers with 8+ hours of sleep see 20% higher recovery scores.")
+# 6. Call to Action
+st.info("Ready to see your insights? Navigate to the **Dashboard** or **Trends** in the sidebar.")
 
-with status_col3:
-    st.warning("⚠️ **Goal Alert**\n\nYou're 2,000 steps away from your daily target!")
+# 7. Data Engine Preview
+try:
+    # This calls your processor. If the user uploaded files via the sidebar,
+    # ensure your processor is updated to handle session_state data!
+    df = process_data()
+    st.divider()
+    
+    # Progress tracker
+    progress_val = (len(df) / 730)
+    st.write(f"**Alicia's Journey:** {len(df)} days logged")
+    st.progress(min(progress_val, 1.0))
+    
+except Exception as e:
+    st.error("Engine Offline: Ensure your CSV files are in the /data folder or uploaded via the sidebar.")
 
-# 5. Clean Footer
+# 8. Footer
 st.markdown("<br><br>", unsafe_allow_html=True)
-st.caption("© 2026 FitSync Health | Designed for Peak Performance")
+st.caption("FitSync Health v2.0 | Built with Python for SarasAI")

@@ -1,68 +1,68 @@
 import pandas as pd
 
-
 def load_data():
-    # Read the CSV file
+    """Loads and cleans the physical health data."""
     df = pd.read_csv('data/health_data.csv')
 
-    # Handle missing values
-    # Fill missing 'Steps' with median value
-    df['Steps'].fillna(df['Steps'].median(), inplace=True)
-
-    # Fill missing 'Sleep_Hours' with 7.0
-    df['Sleep_Hours'].fillna(7.0, inplace=True)
-
-    # Fill missing 'Heart_Rate_bpm' with 68
-    df['Heart_Rate_bpm'].fillna(68, inplace=True)
-
-    # Fill other columns with their median values
-    # Exclude non-numeric columns for median calculation
-    numeric_cols = df.select_dtypes(include=['float64', 'int64']).columns
-    for col in numeric_cols:
-        if col not in ['Steps', 'Sleep_Hours', 'Heart_Rate_bpm']:
-            df[col].fillna(df[col].median(), inplace=True)
+    # Handle missing numerical values with medians/constants
+    df['Steps'] = df['Steps'].fillna(df['Steps'].median())
+    df['Sleep_Hours'] = df['Sleep_Hours'].fillna(7.0)
+    df['Heart_Rate_bpm'] = df['Heart_Rate_bpm'].fillna(68)
 
     # Convert the 'Date' column to datetime objects
     df['Date'] = pd.to_datetime(df['Date'])
-
     return df
 
+def load_mood_data():
+    """Loads and cleans the categorical mental health data (Daylio)."""
+    df = pd.read_csv('data/daylio.csv')
+    
+    # 1. Handle missing Mood strings using Forward Fill (ffill)
+    # This carries the previous day's mood forward into gaps
+    df['mood'] = df['mood'].ffill()
+    df['mood'] = df['mood'].fillna('meh') # Backup for the first row
+
+    # 2. Handle missing activities
+    df['activities'] = df['activities'].fillna('No Entry')
+
+    # 3. Transform categories to numerical scores
+    mood_map = {"rad": 10, "good": 8, "meh": 5, "bad": 3, "awful": 1}
+    df['Mood_Score'] = df['mood'].map(mood_map)
+
+    # 4. Standardize column names for the Join
+    df['Date'] = pd.to_datetime(df['date'])
+    
+    return df[['Date', 'Mood_Score', 'activities']]
 
 def calculate_recovery_score(df):
-    """
-    Calculate the recovery score for each row in the DataFrame based on sleep hours, heart rate, and steps.
-    Adds a new column 'Recovery_Score' to the DataFrame.
-    """
-    # Initialize recovery score with base value of 50
+    """Business logic to calculate daily physical readiness."""
     df['Recovery_Score'] = 50
-
-    # Adjust score based on Sleep_Hours
-    df.loc[df['Sleep_Hours'] >= 7, 'Recovery_Score'] += 20  # Good Sleep
-    df.loc[df['Sleep_Hours'] < 6, 'Recovery_Score'] -= 20  # Poor Sleep
-
-    # Adjust score based on Heart_Rate_bpm
-    heart_rate_factor = (95 - df['Heart_Rate_bpm']) / 45 * 20
-    df['Recovery_Score'] += heart_rate_factor
-
-    # Adjust score based on Steps
-    steps_factor = (df['Steps'] - 4000) / 12000 * 10
-    df['Recovery_Score'] += steps_factor
-
-    # Ensure Recovery_Score stays within 0 to 100
+    df.loc[df['Sleep_Hours'] >= 7, 'Recovery_Score'] += 20
+    df.loc[df['Sleep_Hours'] < 6, 'Recovery_Score'] -= 20
+    
+    # Mathematical factors for HR and Steps
+    df['Recovery_Score'] += (95 - df['Heart_Rate_bpm']) / 45 * 20
+    df['Recovery_Score'] += (df['Steps'] - 4000) / 12000 * 10
+    
     df['Recovery_Score'] = df['Recovery_Score'].clip(lower=0, upper=100)
-
     return df
 
 def process_data():
     """
-    Main entry point for data processing.
-    Loads the data, calculates scores, and returns the final DataFrame.
+    MASTER PIPELINE: 
+    Integrates multiple data sources into a single unified intelligence table.
     """
-    # 1. Call load_data() to get the cleaned DataFrame
-    df = load_data()
+    # 1. Get Physical Data
+    health_df = load_data()
+    health_df = calculate_recovery_score(health_df)
 
-    # 2. Call calculate_recovery_score() to add the Recovery Score
-    df = calculate_recovery_score(df)
+    # 2. Get Mental Data
+    mood_df = load_mood_data()
 
-    # 3. Return the final processed DataFrame
-    return df
+    # 3. THE MERGE (Inner Join)
+    # This aligns the rows so that May 1st Health matches May 1st Mood.
+    final_df = pd.merge(health_df, mood_df, on='Date', how='inner')
+
+    final_df = final_df.round(2) # Keeps everything to 2 decimal places
+
+    return final_df

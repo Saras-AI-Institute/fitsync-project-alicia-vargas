@@ -1,101 +1,83 @@
 import streamlit as st
 import plotly.express as px
 from modules.processor import process_data
+from modules.demo_story import apply_demo_logic
 import pandas as pd
 
 # 1. Page Configuration
-st.set_page_config(layout="wide", page_title="Trends & Insights")
-
-# 2. Title
-st.title("Trends & Insights")
-st.markdown("---")
-
-# 3. Sidebar Filter
-time_range = st.sidebar.selectbox(
-    "Select Time Range", 
-    options=["Last 7 Days", "Last 30 Days", "All time"], 
-    index=2
-)
+st.set_page_config(layout="wide", page_title="FitSync | Long-term Trends")
 
 @st.cache_data
-# 4. Load the dataset
 def load_data():
     return process_data()
 
 df = load_data()
 
-# 5. Apply the logic for Filtering
-# Determine what to keep based on the 'Date' column
+# 2. Filter & Demo Logic
+time_range = st.sidebar.selectbox("Select Time Range", options=["Last 7 Days", "Last 30 Days", "All time"], index=2)
+
+last_date = df['Date'].max()
 if time_range == "Last 7 Days":
-    last_date = df['Date'].max()
     filtered_df = df[df['Date'] > (last_date - pd.Timedelta(days=7))]
 elif time_range == "Last 30 Days":
-    last_date = df['Date'].max()
     filtered_df = df[df['Date'] > (last_date - pd.Timedelta(days=30))]
 else:
     filtered_df = df.copy()
 
-# 6. Summary Statistics
-st.markdown("### Summary Statistics")
-summary_stats = filtered_df[['Recovery_Score', 'Sleep_Hours', 'Steps', 'Calories_Burned']].describe().loc[['mean', 'min', 'max']]
-st.dataframe(summary_stats, use_container_width=True, height=200)
+# Apply the storyteller logic so the trends look consistent with the dashboard
+filtered_df = apply_demo_logic(filtered_df)
 
-# 7. Average Recovery Score - Monthly Trend
-st.markdown("### Average Recovery Score - Monthly Trend")
-filtered_df['Month'] = filtered_df['Date'].dt.to_period('M')
-monthly_avg_recovery = filtered_df.groupby('Month').Recovery_Score.mean().reset_index()
+st.title("📈 Long-term Trend Analysis")
+st.markdown("Exploring the deep correlations between lifestyle habits and physical outcomes over time.")
+st.divider()
 
-# Convert 'Month' to string for JSON serialization
-monthly_avg_recovery['Month'] = monthly_avg_recovery['Month'].astype(str)
+# 3. The Correlation Matrix (The "Pro" Visual)
+st.subheader("🔗 The Metric Correlation Matrix")
+# Selecting only numerical columns for the matrix
+corr_cols = ['Recovery_Score', 'Sleep_Hours', 'Steps', 'Mood_Score', 'Heart_Rate_bpm']
+corr_matrix = filtered_df[corr_cols].corr()
 
-# Ensure filtered_df use strings for 'Month' where necessary
-filtered_df['Month'] = filtered_df['Month'].astype(str)
-
-fig_recovery_monthly = px.line(
-    monthly_avg_recovery, 
-    x='Month', 
-    y='Recovery_Score', 
-    labels={'Recovery_Score': 'Avg Recovery Score'},
-    title="Monthly Average Recovery Score"
+fig_corr = px.imshow(
+    corr_matrix,
+    text_auto=".2f",
+    color_continuous_scale='RdBu_r', # Red is negative, Blue is positive
+    title="How do my metrics influence each other?"
 )
-st.plotly_chart(fig_recovery_monthly, use_container_width=True)
+st.plotly_chart(fig_corr, use_container_width=True)
+st.info("**How to read this:** A score closer to 1.0 (Red) means the metrics move together. For example, as Sleep increases, Recovery usually follows.")
 
-# 8. Distribution Histograms
-st.markdown("### Distributions")
+st.divider()
 
-# Create columns for histograms
-col1, col2 = st.columns(2)
+# 4. Weekly Patterns (Heatmap Style)
+st.subheader("📅 Weekly Recovery Patterns")
+filtered_df['Day_of_Week'] = filtered_df['Date'].dt.day_name()
+day_order = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+
+# Calculate average recovery per day
+weekly_avg = filtered_df.groupby('Day_of_Week')[['Recovery_Score', 'Mood_Score']].mean().reindex(day_order).reset_index()
+
+fig_weekly = px.bar(
+    weekly_avg, 
+    x='Day_of_Week', 
+    y='Recovery_Score', 
+    color='Mood_Score',
+    color_continuous_scale='Viridis',
+    title="Average Physical Readiness by Day of Week"
+)
+st.plotly_chart(fig_weekly, use_container_width=True)
+
+# 5. Distribution Histograms (Now simplified in one row)
+st.divider()
+st.subheader("📊 Consistency Check (Distributions)")
+col1, col2, col3 = st.columns(3)
 
 with col1:
-    fig_steps_hist = px.histogram(
-        filtered_df, 
-        x='Steps',
-        nbins=30,
-        title='Distribution of Steps'
-    )
-    st.plotly_chart(fig_steps_hist, use_container_width=True)
-
-    fig_calories_hist = px.histogram(
-        filtered_df, 
-        x='Calories_Burned',
-        nbins=30,
-        title='Distribution of Calories Burned'
-    )
-    st.plotly_chart(fig_calories_hist, use_container_width=True)
+    st.plotly_chart(px.histogram(filtered_df, x='Steps', title='Steps Distribution', color_discrete_sequence=['#00d4ff']), use_container_width=True)
 
 with col2:
-    fig_recovery_hist = px.histogram(
-        filtered_df, 
-        x='Recovery_Score',
-        nbins=30,
-        title='Distribution of Recovery Score'
-    )
-    st.plotly_chart(fig_recovery_hist, use_container_width=True)
+    st.plotly_chart(px.histogram(filtered_df, x='Sleep_Hours', title='Sleep Distribution', color_discrete_sequence=['#7a4bff']), use_container_width=True)
 
-    fig_sleep_hist = px.histogram(
-        filtered_df, 
-        x='Sleep_Hours',
-        nbins=30,
-        title='Distribution of Sleep Hours'
-    )
-    st.plotly_chart(fig_sleep_hist, use_container_width=True)
+with col3:
+    st.plotly_chart(px.histogram(filtered_df, x='Recovery_Score', title='Recovery Distribution', color_discrete_sequence=['#ff4b4b']), use_container_width=True)
+
+st.caption(f"FitSync Trends Engine | Analyzing {len(filtered_df)} unique days of health data.")
