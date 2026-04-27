@@ -65,23 +65,19 @@ Bash
 streamlit run Home.py
 
 ---
-## 🛠 Developer Notes: Switching from Demo to Live Data
-FitSync currently ships with a "Demo Mode" enabled to ensure the trend analysis visualizations are populated with a complete dataset for evaluation.
+## 🛠 Developer Notes: Dynamic Data Switching
 
-To switch the app to Live Mode (where it only reads from the /data folder or user uploads):
+FitSync features an intelligent **Smart-Switch** logic that ensures the dashboard is always functional:
 
-Open Home.py (or your main logic file).
+* **Demo Mode:** If no files are uploaded, the app automatically pulls from `modules/demo_story.py` to showcase the "Adobe Glow" visualizations and trend analysis.
+* **Live Mode:** As soon as a user uploads their own Apple Health or Daylio exports via the sidebar, the app detects the presence of data in the `session_state`, clears the demo data, and renders personal analytics in real-time.
 
-Locate the data loading section (usually inside the try/except block).
-
-Comment out the demo line and uncomment the live processing line:
-
-Python
-# --- TOGGLE DEMO MODE ---
-# df = process_demo_data()  # <--- Comment this out
-df = process_data()         # <--- Uncomment this for live data
-# ------------------------
-Note: In Live Mode, the app requires valid export.csv files from Apple Health and Daylio in the /data directory to render charts.
+**Technical Implementation:** The switch is handled via a conditional check in `Home.py`, preventing the need for manual code commenting:
+```python
+if 'uploaded_apple' not in st.session_state and 'uploaded_daylio' not in st.session_state:
+    df_filtered = apply_demo_logic(df_filtered) # Auto-Demo
+else:
+    # Live personal data processing
 
 ## 🧠 The Philosophy
 The core of FitSync is the **Recovery Score**. This is a proprietary calculation that weights heart rate, sleep duration, and daily mood to tell the user not just how much they moved, but how ready they are for the day ahead.
