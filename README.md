@@ -86,11 +86,15 @@ The core of FitSync is the **Recovery Score**. This is a proprietary calculation
 ---
 
 ## 🤖 AI Collaboration Statement
-This project was developed using an AI-Augmented Workflow.
+This project was developed using a "Human-in-the-Loop" AI workflow. While AI was utilized to streamline the building process, the core system architecture and data logic were human-led.
 
-Logic & Architecture: AI was utilized to help design the ETL (Extract, Transform, Load) pipeline and handle complex data merges between Apple Health and Daylio schemas.
+System Architecture: I designed the multi-page Streamlit framework and the dynamic state-management logic that allows the app to switch seamlessly between Demo Mode and Live Mode.
 
-Problem Solving: AI served as a pair-programmer for real-time debugging of Streamlit session state and multi-page configuration errors.
+Proprietary Logic: I architected the Recovery Score Algorithm, defining how heart rate, sleep duration, and mood data are weighted and normalized to create a single actionable metric.
+
+Data Engineering: I directed the development of the ETL pipeline, specifically the logic required to merge disparate schemas from Apple Health (XML/CSV) and Daylio (CSV) into a unified data structure.
+
+AI as a Force Multiplier: Tools like Google Gemini and GitHub Copilot were used as pair-programmers to accelerate boilerplate generation, assist in complex Plotly visualization debugging, and ensure code PEP-8 compliance.
 
 ### 👩‍💻 Author
 **Alicia Vargas**
