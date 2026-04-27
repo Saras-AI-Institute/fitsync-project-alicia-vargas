@@ -1,41 +1,13 @@
 import pandas as pd
-
-def load_data():
-    """Loads and cleans the physical health data."""
-    df = pd.read_csv('data/health_data.csv')
-
-    # Handle missing numerical values with medians/constants
-    df['Steps'] = df['Steps'].fillna(df['Steps'].median())
-    df['Sleep_Hours'] = df['Sleep_Hours'].fillna(7.0)
-    df['Heart_Rate_bpm'] = df['Heart_Rate_bpm'].fillna(68)
-
-    # Convert the 'Date' column to datetime objects
-    df['Date'] = pd.to_datetime(df['Date'])
-    return df
-
-def load_mood_data():
-    """Loads and cleans the categorical mental health data (Daylio)."""
-    df = pd.read_csv('data/daylio.csv')
-    
-    # 1. Handle missing Mood strings using Forward Fill (ffill)
-    # This carries the previous day's mood forward into gaps
-    df['mood'] = df['mood'].ffill()
-    df['mood'] = df['mood'].fillna('meh') # Backup for the first row
-
-    # 2. Handle missing activities
-    df['activities'] = df['activities'].fillna('No Entry')
-
-    # 3. Transform categories to numerical scores
-    mood_map = {"rad": 10, "good": 8, "meh": 5, "bad": 3, "awful": 1}
-    df['Mood_Score'] = df['mood'].map(mood_map)
-
-    # 4. Standardize column names for the Join
-    df['Date'] = pd.to_datetime(df['date'])
-    
-    return df[['Date', 'Mood_Score', 'activities']]
+import streamlit as st
 
 def calculate_recovery_score(df):
     """Business logic to calculate daily physical readiness."""
+    # Ensure columns are numeric before calculating
+    df['Steps'] = pd.to_numeric(df['Steps'], errors='coerce').fillna(0)
+    df['Sleep_Hours'] = pd.to_numeric(df['Sleep_Hours'], errors='coerce').fillna(7)
+    df['Heart_Rate_bpm'] = pd.to_numeric(df['Heart_Rate_bpm'], errors='coerce').fillna(70)
+
     df['Recovery_Score'] = 50
     df.loc[df['Sleep_Hours'] >= 7, 'Recovery_Score'] += 20
     df.loc[df['Sleep_Hours'] < 6, 'Recovery_Score'] -= 20
@@ -50,19 +22,47 @@ def calculate_recovery_score(df):
 def process_data():
     """
     MASTER PIPELINE: 
-    Integrates multiple data sources into a single unified intelligence table.
+    Checks for uploads, cleans data, and merges into one final table.
     """
-    # 1. Get Physical Data
-    health_df = load_data()
+    # 1. SELECT DATA SOURCE
+    if 'uploaded_apple' in st.session_state and 'uploaded_daylio' in st.session_state:
+        health_df = st.session_state['uploaded_apple']
+        mood_df_raw = st.session_state['uploaded_daylio']
+        st.sidebar.success("✅ Using your uploaded files!")
+    else:
+        try:
+            health_df = pd.read_csv('data/health_data.csv')
+            mood_df_raw = pd.read_csv('data/daylio.csv')
+            st.sidebar.info("ℹ️ Using local demo data")
+        except FileNotFoundError:
+            st.error("No data found. Please upload files.")
+            return None
+
+    # 2. CLEAN HEALTH DATA
+    health_df['Date'] = pd.to_datetime(health_df['Date'])
     health_df = calculate_recovery_score(health_df)
 
-    # 2. Get Mental Data
-    mood_df = load_mood_data()
+    # 3. CLEAN MOOD DATA
+    # Handle different possible column names for date
+    mood_date_col = 'date' if 'date' in mood_df_raw.columns else 'Date'
+    if 'full_date' in mood_df_raw.columns: mood_date_col = 'full_date'
+    
+    mood_df_raw['Date'] = pd.to_datetime(mood_df_raw[mood_date_col])
+    mood_df_raw['mood'] = mood_df_raw['mood'].ffill().fillna('meh')
+    mood_df_raw['activities'] = mood_df_raw['activities'].fillna('No Entry')
 
-    # 3. THE MERGE (Inner Join)
-    # This aligns the rows so that May 1st Health matches May 1st Mood.
-    final_df = pd.merge(health_df, mood_df, on='Date', how='inner')
+    mood_map = {"rad": 10, "good": 8, "meh": 5, "bad": 3, "awful": 1}
+    mood_df_raw['Mood_Score'] = mood_df_raw['mood'].map(mood_map)
 
-    final_df = final_df.round(2) # Keeps everything to 2 decimal places
+    # 4. THE MERGE
+    # We define final_df here so it's guaranteed to exist for the return
+    final_df = pd.merge(
+        health_df, 
+        mood_df_raw[['Date', 'Mood_Score', 'activities']], 
+        on='Date', 
+        how='inner'
+    )
+
+    final_df = final_df.round(2)
 
     return final_df

@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+from modules.interface import render_global_sidebar
 from modules.processor import process_data
 #following line is for a demo version. comment out or delete once using real data to insure integrity of data. Remember to also filter out line 40.
 from modules.demo_story import apply_demo_logic
@@ -10,13 +11,12 @@ st.set_page_config(
     page_title="FitSync | Data Intelligence",
     page_icon="📊"
 )
+# 2. Sidebar Activation (Global for all pages)
+render_global_sidebar()
 
-# 2. Data Loading with Cache
-@st.cache_data
-def get_clean_data():
-    return process_data()
+df = process_data()
 
-df = get_clean_data()
+df = process_data()
 # 3. Sidebar Navigation & Filters
 with st.sidebar:
     st.title("Filters")
@@ -38,10 +38,15 @@ else:
     df_filtered = df
 
 # --- MOVE THE DEMO NUDGE HERE ---
-# Now that df_filtered actually exists, we can apply the logic!
-from modules.demo_story import apply_demo_logic
-df_filtered = apply_demo_logic(df_filtered)
-# --------------------------------
+# --- SMART DATA LOGIC ---
+# Only apply the "Demo Story" if the user hasn't uploaded their own files
+if 'uploaded_apple' not in st.session_state and 'uploaded_daylio' not in st.session_state:
+    from modules.demo_story import apply_demo_logic
+    df_filtered = apply_demo_logic(df_filtered)
+    st.sidebar.warning("Demo Mode: Showing sample correlations.")
+else:
+    st.sidebar.success("Live Mode: Showing your personal data.")
+# -------------------------
 
 # 5. Header
 st.title("📊 Personal Health Analytics")
