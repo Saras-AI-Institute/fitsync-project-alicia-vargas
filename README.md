@@ -42,23 +42,22 @@ fitsync/
 
 ---
 
-## ⚙️ Setup & Installation
+### 🚀 How to Run Locally
 
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/your-username/fitsync-project.git
-   cd fitsync-project
-   ```
+Follow these steps to set up the development environment on your machine:
 
-2. **Install dependencies:**
+1. **Clone the Repository**
    ```bash
-   pip install streamlit pandas plotly
-   ```
+   git clone [https://github.com/mudster11-hue/fitsync-project-alicia-vargas.git](https://github.com/mudster11-hue/fitsync-project-alicia-vargas.git)
+   cd fitsync-project-alicia-vargas
+Install Dependencies
 
-3. **Run the application:**
-   ```bash
-   streamlit run Home.py
-   ```
+Bash
+pip install -r requirements.txt
+Launch the Dashboard
+
+Bash
+streamlit run Home.py
 
 ---
 ## 🛠 Developer Notes: Switching from Demo to Live Data
