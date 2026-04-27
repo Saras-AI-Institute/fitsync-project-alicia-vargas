@@ -69,7 +69,7 @@ streamlit run Home.py
 
 FitSync features an intelligent **Smart-Switch** logic that ensures the dashboard is always functional:
 
-* **Demo Mode:** If no files are uploaded, the app automatically pulls from `modules/demo_story.py` to showcase the "Adobe Glow" visualizations and trend analysis.
+* **Demo Mode:** If no files are uploaded, the app automatically pulls from `modules/demo_story.py` to showcase the visualizations and trend analysis.
 * **Live Mode:** As soon as a user uploads their own Apple Health or Daylio exports via the sidebar, the app detects the presence of data in the `session_state`, clears the demo data, and renders personal analytics in real-time.
 
 **Technical Implementation:** The switch is handled via a conditional check in `Home.py`, preventing the need for manual code commenting:
