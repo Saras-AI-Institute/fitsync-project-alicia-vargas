@@ -6,7 +6,7 @@
 
 🌐 Live Demo
 Experience the interactive dashboard live in your browser:
-👉 ([View FitSync Live Dashboard](https://fitsync-project-alicia-vargas.streamlit.app/))
+<a href="[https://your-app-url.streamlit.app](https://fitsync-project-alicia-vargas.streamlit.app/)" target="_blank">👉 View FitSync Live Dashboard</a>
 
 ## 🚀 Key Features
 
