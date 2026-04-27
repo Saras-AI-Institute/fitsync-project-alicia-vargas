@@ -10,7 +10,7 @@
 * **Trend Analysis:** Deep-dive correlations (Heatmaps) showing how sleep and steps directly impact mood.
 * **The "Storyteller" Engine:** A custom logic layer that simulates realistic health correlations for demonstration purposes.
 * **Dynamic Data Import:** Supports session-based CSV uploads for Apple Health and Daylio exports.
-* **Responsive UI:** A clean, modern interface built entirely with Streamlit.
+* **Responsive UI:** A clean, modern interface built with Streamlit.
 
 ---
 
