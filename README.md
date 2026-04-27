@@ -4,9 +4,10 @@
 
 ---
 
-🌐 Live Demo
+### 🌐 Live Demo
 Experience the interactive dashboard live in your browser:
-<a href="https://fitsync-project-alicia-vargas.streamlit.app/" target="_blank">👉 View FitSync Live Dashboard</a>
+
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://fitsync-project-alicia-vargas.streamlit.app/)
 
 ## 🚀 Key Features
 
