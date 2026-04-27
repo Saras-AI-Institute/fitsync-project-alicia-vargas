@@ -4,6 +4,10 @@
 
 ---
 
+🌐 Live Demo
+Experience the interactive dashboard live in your browser:
+👉 [View FitSync Live Dashboard]([https://your-url-here.com](https://fitsync-project-alicia-vargas.streamlit.app/))
+
 ## 🚀 Key Features
 
 * **Unified Dashboard:** A real-time overview of physical activity vs. mental reflections.
