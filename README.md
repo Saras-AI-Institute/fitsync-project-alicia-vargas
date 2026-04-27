@@ -78,12 +78,13 @@ if 'uploaded_apple' not in st.session_state and 'uploaded_daylio' not in st.sess
     df_filtered = apply_demo_logic(df_filtered) # Auto-Demo
 else:
     # Live personal data processing
+'''
 
-### 🧠 The Philosophy
+## 🧠 The Philosophy
 The core of FitSync is the **Recovery Score**. This is a proprietary calculation that weights heart rate, sleep duration, and daily mood to tell the user not just how much they moved, but how ready they are for the day ahead.
-
+'''
 ---
-### 🤖 AI Collaboration Statement
+## 🤖 AI Collaboration Statement
 This project was developed using an AI-Augmented Workflow.
 
 Logic & Architecture: AI was utilized to help design the ETL (Extract, Transform, Load) pipeline and handle complex data merges between Apple Health and Daylio schemas.
