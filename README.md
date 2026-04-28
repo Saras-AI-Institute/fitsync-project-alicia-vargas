@@ -1,6 +1,6 @@
 # 📈 FitSync | Holistic Health Intelligence
 
-**FitSync** is a Python-based health analytics platform that bridges the gap between physical biometrics and mental well-being. Unlike standard fitness trackers that focus solely on movement, FitSync merges data from **Apple Health** (physical) and **Daylio** (mental) to provide a unified "Recovery Score."
+**FitSync** is a Python-based health analytics platform that bridges the gap between physical biometrics and mental well-being. Unlike standard fitness trackers that focus solely on movement, FitSync merges data from established applications such as **Apple Health** (physical) and **Daylio** (mental) to provide insight between your internal and external health.
 
 ---
 
